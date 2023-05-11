@@ -19,7 +19,7 @@ data TotpArgs = TotpArgs
     -- | totp time step
     getStep :: Integer,
     -- | digits of hotp output
-    getDigits :: Integer
+    getDigits :: Int
   }
   deriving (Show)
 
