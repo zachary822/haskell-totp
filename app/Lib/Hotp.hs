@@ -15,5 +15,5 @@ hotp key counter digits = printf ("%0" ++ show digits ++ "u") codeStr
   where
     hash = hmac_sha1 key counter
     offset = fromIntegral $ last hash .&. 0x0f :: Int
-    codeInt = runGet getWord32be (BL.pack $ take 4 . drop offset $ hash) .&. 0x7fffffff
-    codeStr = fromIntegral codeInt `mod` (10 ^ digits) :: Integer
+    codeInt = fromIntegral $ runGet getWord32be (BL.pack $ take 4 . drop offset $ hash) .&. 0x7fffffff :: Integer
+    codeStr = codeInt `mod` (10 ^ digits)
