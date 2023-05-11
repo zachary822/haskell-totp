@@ -7,7 +7,6 @@ import Data.ByteString.Builder (string7, toLazyByteString)
 import Data.ByteString.Lazy qualified as L
 import Data.ByteString.Lazy.Base32 as Base32 (decodeBase32)
 import Data.Text qualified as T
-import Data.Time.Clock (NominalDiffTime)
 import Data.Time.Clock.POSIX (getPOSIXTime)
 import Lib.Hotp (hotp)
 import Options.Applicative
@@ -58,6 +57,6 @@ main = do
   case L.unpack <$> (Base32.decodeBase32 . toLazyByteString . string7 . getKey) args of
     Left a -> error $ T.unpack a
     Right key -> do
-      timestamp <- (round :: NominalDiffTime -> Integer) <$> getPOSIXTime
-      let counter = (L.unpack . toLazyByteString . putInt64be) (fromIntegral $ timestamp `div` getStep args)
+      timestamp <- round <$> getPOSIXTime
+      let counter = L.unpack . toLazyByteString . putInt64be . fromIntegral . div timestamp $ getStep args
       putStr $ hotp key counter (getDigits args)
