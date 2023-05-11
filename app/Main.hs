@@ -14,8 +14,11 @@ import Lib.Utils (getOctets)
 import Options.Applicative
 
 data TotpArgs = TotpArgs
-  { getKey :: String,
+  { -- | hotp seed
+    getKey :: String,
+    -- | totp time step
     getStep :: Integer,
+    -- | digits of hotp output
     getDigits :: Integer
   }
   deriving (Show)
