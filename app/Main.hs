@@ -3,14 +3,13 @@
 module Main where
 
 import Data.Binary.Builder (putInt64be)
-import Data.Binary.Get (runGet)
-import Data.ByteString.Builder (stringUtf8, toLazyByteString)
+import Data.ByteString.Builder (string7, toLazyByteString)
+import Data.ByteString.Lazy qualified as L
 import Data.ByteString.Lazy.Base32 as Base32 (decodeBase32)
-import Data.Either (fromRight)
+import Data.Text qualified as T
 import Data.Time.Clock (NominalDiffTime)
 import Data.Time.Clock.POSIX (getPOSIXTime)
 import Lib.Hotp (hotp)
-import Lib.Utils (getOctets)
 import Options.Applicative
 
 data TotpArgs = TotpArgs
@@ -56,8 +55,9 @@ main = do
 
   args <- execParser opts
 
-  let key = runGet getOctets (fromRight "" (Base32.decodeBase32 $ (toLazyByteString . stringUtf8 . getKey) args))
-  timestamp <- (round :: NominalDiffTime -> Integer) <$> getPOSIXTime
-  let counter = runGet getOctets $ (toLazyByteString . putInt64be) (fromIntegral $ timestamp `div` getStep args)
-
-  putStr $ hotp key counter (getDigits args)
+  case L.unpack <$> (Base32.decodeBase32 . toLazyByteString . string7 . getKey) args of
+    Left a -> error $ T.unpack a
+    Right key -> do
+      timestamp <- (round :: NominalDiffTime -> Integer) <$> getPOSIXTime
+      let counter = (L.unpack . toLazyByteString . putInt64be) (fromIntegral $ timestamp `div` getStep args)
+      putStr $ hotp key counter (getDigits args)

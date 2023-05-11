@@ -2,15 +2,15 @@
 
 module Lib.Hotp where
 
-import Codec.Utils (Octet)
 import Data.Binary.Get (getWord32be, runGet)
 import Data.Bits (Bits ((.&.)))
 import Data.ByteString.Lazy qualified as BL
 import Data.HMAC (hmac_sha1)
+import Data.Word (Word8)
 import Text.Printf (printf)
 
 -- | calculate HOTP code from seed and moving factor
-hotp :: [Octet] -> [Octet] -> Int -> String
+hotp :: [Word8] -> [Word8] -> Int -> String
 hotp key counter digits = printf ("%0" ++ show digits ++ "u") codeStr
   where
     hash = hmac_sha1 key counter
