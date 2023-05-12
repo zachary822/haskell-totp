@@ -40,6 +40,10 @@ author:             Zachary Juang
 -- An email address to which users can send suggestions, bug reports, and patches.
 maintainer:         zachary822@me.com
 
+source-repository head
+    type: git
+    location: https://github.com/zachary822/haskell-totp.git
+
 -- A copyright notice.
 -- copyright:
 build-type:         Simple
@@ -53,15 +57,33 @@ extra-doc-files:    CHANGELOG.md
 common warnings
     ghc-options: -Wall
 
+common shared-properties
+    default-language: GHC2021
+
+library
+    import:           warnings,
+                      shared-properties
+
+    hs-source-dirs:   src
+
+    exposed-modules:  Lib.Hotp
+
+    build-depends:    base ^>=4.16.4.0,
+                      text,
+                      bytestring,
+                      binary,
+                      Crypto
+
 executable totp
     -- Import common warning flags.
-    import:           warnings
+    import:           warnings,
+                      shared-properties
 
     -- .hs or .lhs file containing the Main module.
     main-is:          Main.hs
 
     -- Modules included in this executable, other than Main.
-    other-modules:    Lib.Hotp
+    -- other-modules:
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
@@ -73,11 +95,8 @@ executable totp
                       bytestring,
                       binary,
                       time,
-                      Crypto,
-                      optparse-applicative
+                      optparse-applicative,
+                      totp
 
     -- Directories containing source files.
-    hs-source-dirs:   app
-
-    -- Base language which the package is written in.
-    default-language: GHC2021
+    hs-source-dirs:   executables
