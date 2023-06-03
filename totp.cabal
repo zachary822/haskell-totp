@@ -68,11 +68,12 @@ library
 
     exposed-modules:  Lib.Hotp
 
-    build-depends:    base ^>=4.16.4.0,
+    build-depends:    base >=4.16.4.0 && <5,
                       text,
                       bytestring,
                       binary,
-                      Crypto
+                      cryptonite,
+                      memory
 
 executable totp
     -- Import common warning flags.
@@ -89,7 +90,7 @@ executable totp
     -- other-extensions:
 
     -- Other library packages from which modules are imported.
-    build-depends:    base ^>=4.16.4.0,
+    build-depends:    base >=4.16.4.0 && <5,
                       base32,
                       text,
                       bytestring,

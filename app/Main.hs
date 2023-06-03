@@ -54,9 +54,9 @@ main = do
 
   args <- execParser opts
 
-  case L.unpack <$> (Base32.decodeBase32 . toLazyByteString . string7 . getKey) args of
+  case L.toStrict <$> (Base32.decodeBase32 . toLazyByteString . string7 . getKey) args of
     Left a -> error $ T.unpack a
     Right key -> do
       timestamp <- round <$> getPOSIXTime
-      let counter = L.unpack . toLazyByteString . putInt64be . fromIntegral . div timestamp $ getStep args
+      let counter = L.toStrict . toLazyByteString . putInt64be . fromIntegral . div timestamp $ getStep args
       putStr $ hotp key counter (getDigits args)
