@@ -91,13 +91,13 @@ executable totp
 
     -- Other library packages from which modules are imported.
     build-depends:    base >=4.16.4.0 && <5,
-                      base32,
+                      totp,
                       text,
                       bytestring,
                       binary,
                       time,
                       optparse-applicative,
-                      totp
+                      memory
 
     -- Directories containing source files.
     hs-source-dirs:   app

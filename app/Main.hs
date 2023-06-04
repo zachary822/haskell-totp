@@ -3,21 +3,20 @@
 module Main where
 
 import Data.Binary.Builder (putInt64be)
+import Data.ByteArray.Encoding (Base (Base32), convertFromBase)
 import Data.ByteString.Builder (string7, toLazyByteString)
 import Data.ByteString.Lazy qualified as L
-import Data.ByteString.Lazy.Base32 as Base32 (decodeBase32)
-import Data.Text qualified as T
 import Data.Time.Clock.POSIX (getPOSIXTime)
 import Lib.Hotp (hotp)
 import Options.Applicative
 
 data TotpArgs = TotpArgs
-  { -- | hotp seed
-    getKey :: String,
-    -- | totp time step
-    getStep :: Integer,
-    -- | digits of hotp output
-    getDigits :: Int
+  { getKey :: String
+  -- ^ hotp seed
+  , getStep :: Integer
+  -- ^ totp time step
+  , getDigits :: Int
+  -- ^ digits of hotp output
   }
   deriving (Show)
 
@@ -54,8 +53,8 @@ main = do
 
   args <- execParser opts
 
-  case L.toStrict <$> (Base32.decodeBase32 . toLazyByteString . string7 . getKey) args of
-    Left a -> error $ T.unpack a
+  case (convertFromBase Base32 . L.toStrict . toLazyByteString . string7 . getKey) args of
+    Left a -> error a
     Right key -> do
       timestamp <- round <$> getPOSIXTime
       let counter = L.toStrict . toLazyByteString . putInt64be . fromIntegral . div timestamp $ getStep args
