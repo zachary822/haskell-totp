@@ -97,7 +97,8 @@ executable totp
                       binary,
                       time,
                       optparse-applicative,
-                      memory
+                      memory,
+                      transformers
 
     -- Directories containing source files.
     hs-source-dirs:   app

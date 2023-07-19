@@ -2,6 +2,8 @@
 
 module Main where
 
+import Control.Monad.Trans.Class
+import Control.Monad.Trans.Except
 import Data.Binary.Builder (putInt64be)
 import Data.ByteArray.Encoding (Base (Base32), convertFromBase)
 import Data.ByteString.Builder (string7, toLazyByteString)
@@ -53,9 +55,12 @@ main = do
 
   args <- execParser opts
 
-  case (convertFromBase Base32 . L.toStrict . toLazyByteString . string7 . getKey) args of
-    Left a -> error a
-    Right key -> do
-      timestamp <- round <$> getPOSIXTime
-      let counter = L.toStrict . toLazyByteString . putInt64be . fromIntegral . div timestamp $ getStep args
-      putStr $ hotp key counter (getDigits args)
+  res <- runExceptT $ do
+    key <- except $ (convertFromBase Base32 . L.toStrict . toLazyByteString . string7 . getKey) args
+    timestamp <- lift $ round <$> getPOSIXTime
+    let counter = L.toStrict . toLazyByteString . putInt64be . fromIntegral . div timestamp $ getStep args
+    except $ hotp key counter (getDigits args)
+
+  case res of
+    Left e -> fail e
+    Right code -> putStr code
