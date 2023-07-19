@@ -17,14 +17,9 @@ hotp key counter digits
   | digits > codeLen = take (digits - codeLen) (repeat '0') ++ codeStr
   | otherwise = drop (codeLen - digits) codeStr
  where
-  digest :: Digest SHA1
-  digest = hmacGetDigest $ hmac key counter
-
+  digest = hmacGetDigest $ hmac key counter :: Digest SHA1
   hash = B.unpack $ convert digest
-  offset = fromIntegral $ last hash .&. 0x0f
-
-  codeInt :: Int
-  codeInt = fromIntegral $ runGet getWord32be (BL.pack $ take 4 . drop offset $ hash) .&. 0x7fffffff
-
+  offset = fromIntegral $ last hash .&. 0x0f :: Int
+  codeInt = fromIntegral $ runGet getWord32be (BL.pack $ take 4 . drop offset $ hash) .&. 0x7fffffff :: Int
   codeStr = show codeInt
   codeLen = length codeStr
