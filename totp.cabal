@@ -69,7 +69,6 @@ library
     exposed-modules:  Lib.Hotp
 
     build-depends:    base >=4.16.4.0 && <5,
-                      text,
                       bytestring,
                       binary,
                       cryptonite,
