@@ -1,13 +1,14 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards #-}
 
 module Main where
 
 import Control.Monad.Trans.Class
 import Control.Monad.Trans.Except
-import Data.Binary.Builder (putInt64be)
 import Data.ByteArray.Encoding (Base (Base32), convertFromBase)
-import Data.ByteString.Builder (string7, toLazyByteString)
-import Data.ByteString.Lazy qualified as L
+import Data.ByteString.Builder (int64BE, toLazyByteString)
+import Data.ByteString.Char8 qualified as C8
+import Data.ByteString.Lazy qualified as BL
 import Data.Time.Clock.POSIX (getPOSIXTime)
 import Lib.Hotp (hotp)
 import Options.Applicative
@@ -53,13 +54,17 @@ main :: IO ()
 main = do
   let opts = info (totpArgsParser <**> helper) fullDesc
 
-  args <- execParser opts
+  TotpArgs{..} <- execParser opts
 
   res <- runExceptT $ do
-    key <- except $ (convertFromBase Base32 . L.toStrict . toLazyByteString . string7 . getKey) args
-    timestamp <- lift $ round <$> getPOSIXTime
-    let counter = L.toStrict . toLazyByteString . putInt64be . fromIntegral . div timestamp $ getStep args
-    except $ hotp key counter (getDigits args)
+    key <-
+      except $
+        (convertFromBase Base32 . C8.pack) getKey
+    timestamp <- round <$> lift getPOSIXTime
+    let counter =
+          BL.toStrict . toLazyByteString . int64BE . fromIntegral . div timestamp $
+            getStep
+    except $ hotp key counter getDigits
 
   case res of
     Left e -> fail e

@@ -3,7 +3,7 @@
 module Lib.Hotp where
 
 import Crypto.Hash (Digest, SHA1)
-import Crypto.MAC.HMAC (HMAC (hmacGetDigest), hmac, hmacGetDigest)
+import Crypto.MAC.HMAC (HMAC (hmacGetDigest), hmac)
 import Data.Binary.Get (getWord32be, runGet)
 import Data.Bits (Bits ((.&.)))
 import Data.ByteArray (convert)
@@ -17,7 +17,8 @@ hotp key counter digits
   | digits < 6 = Left "too few digits"
   | otherwise = Right $ show $ codeInt `mod` (10 ^ digits)
  where
-  digest = hmacGetDigest $ hmac key counter :: Digest SHA1
-  hash = B.unpack $ convert digest
-  offset = fromIntegral $ last hash .&. 0x0f
-  codeInt = fromIntegral $ runGet getWord32be (BL.pack $ take 4 . drop offset $ hash) .&. 0x7fffffff :: Int
+  hash = convert (hmacGetDigest $ hmac key counter :: Digest SHA1)
+  offset = fromIntegral $ B.last hash .&. 0x0f
+  codeInt =
+    runGet getWord32be (BL.fromStrict . B.take 4 . B.drop offset $ hash)
+      .&. 0x7fffffff
